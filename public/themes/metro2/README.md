@@ -1,0 +1,1 @@
+Sipintar adalah oke
