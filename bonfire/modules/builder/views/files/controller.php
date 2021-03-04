@@ -52,7 +52,7 @@ if ($db_required != '') {
                 if (\$result) {
                     Template::set_message(count(\$checked) . ' ' . lang('{$module_name_lower}_delete_success'), 'success');
                 } else {
-                    Template::set_message(lang('{$module_name_lower}_delete_failure') . \$this->{$module_name_lower}_model->error, 'error');
+                    Template::set_message(lang('{$module_name_lower}_delete_failure') . \$this->{$module_name_lower}_model->error, 'danger');
                 }
             }
         }";
@@ -97,6 +97,58 @@ if ($controller_name_lower != $module_name_lower) {
 }
 
 //------------------------------------------------------------------------------
+// Datatable Serverside
+//------------------------------------------------------------------------------
+
+$dt_serverside = "
+    \$lists         = \$this->{$module_name_lower}_model->get_datatables();
+    \$count_all      = \$this->{$module_name_lower}_model->count_all_filtered();
+    \$count_filtered = \$this->{$module_name_lower}_model->count_filtered();
+
+    \$data = array();
+
+    \$i = \$this->input->post('start');
+    if(\$lists){
+        foreach (\$lists as \$item) {
+            \$i++;
+            \$row = array();
+    
+            if (\$this->auth->has_permission(\$this->permissionDelete)) {
+                \$row[] = \"
+                    <label class='checkbox checkbox-single'> 
+                        <input type='checkbox' name='checked[]' value='\" .\$item->{$primary_key_field}. \"' /> 
+                        <span></span>
+                    </label>\";
+    
+            }	
+            \$i = 1;	
+            foreach(\$item as \$itm ){
+                if(\$i==1) {
+                    \$i++; 
+                    continue;
+                }
+                \$row[] = \$itm;
+            }
+    
+            if (\$this->auth->has_permission(\$this->permissionEdit)) {
+                \$row[] = anchor(SITE_AREA . '/{$controller_name_lower}/{$module_name_lower}/edit/' . \$item->{$primary_key_field}, '<i class=\"la la-edit\"></i> '.lang('bf_action_edit'), 'class=\"btn btn-outline-success btn-sm mr-3\"'); 
+            }
+            
+            \$data[] = \$row;
+        }
+    }
+    
+    \$output = array(
+        'draw' => \$this->input->post('draw'),
+        'recordsTotal' => \$count_all,
+        'recordsFiltered' => \$count_filtered,
+        'data' => \$data,
+    );
+
+    echo json_encode(\$output);
+";
+
+//------------------------------------------------------------------------------
 // Create
 //------------------------------------------------------------------------------
 
@@ -117,7 +169,7 @@ if ($db_required != '') {
 
             // Not validation error
             if ( ! empty(\$this->{$module_name_lower}_model->error)) {
-                Template::set_message(lang('{$module_name_lower}_create_failure') . \$this->{$module_name_lower}_model->error, 'error');
+                Template::set_message(lang('{$module_name_lower}_create_failure') . \$this->{$module_name_lower}_model->error, 'danger');
             }
         }";
 
@@ -136,7 +188,7 @@ if ($db_required != '') {
 
             // Not validation error
             if ( ! empty(\$this->{$module_name_lower}_model->error)) {
-                Template::set_message(lang('{$module_name_lower}_edit_failure') . \$this->{$module_name_lower}_model->error, 'error');
+                Template::set_message(lang('{$module_name_lower}_edit_failure') . \$this->{$module_name_lower}_model->error, 'danger');
             }
         }";
 
@@ -152,7 +204,7 @@ if ($db_required != '') {
                 redirect(SITE_AREA . '/{$controller_name_lower}/{$module_name_lower}');
             }
 
-            Template::set_message(lang('{$module_name_lower}_delete_failure') . \$this->{$module_name_lower}_model->error, 'error');
+            Template::set_message(lang('{$module_name_lower}_delete_failure') . \$this->{$module_name_lower}_model->error, 'danger');
         }";
     }
 }
@@ -187,7 +239,7 @@ $mb_edit = "
     {
         \$id = \$this->uri->segment(5);
         if (empty(\$id)) {
-            Template::set_message(lang('{$module_name_lower}_invalid_id'), 'error');
+            Template::set_message(lang('{$module_name_lower}_invalid_id'), 'danger');
 
             redirect(SITE_AREA . '/{$controller_name_lower}/{$module_name_lower}');
         }
@@ -275,8 +327,9 @@ for ($counter = 1; $field_total >= $counter; $counter++) {
             }
 
             $constructorExtras .= "
-            Assets::add_css('jquery-ui-timepicker.css');
-            Assets::add_js('jquery-ui-timepicker-addon.js');";
+            Assets::add_js('assets/js/codeigniter-csrf.js');
+            ";
+
             $datetime_included = true;
         } elseif (in_array($db_field_type, $textTypes)
             && $textarea_included === false
@@ -450,6 +503,11 @@ class {$controller_name} extends {$baseClass}
         {$indexToolbarTitle}
 
         Template::render();
+    }
+
+    public function json_index()
+    {
+        {$dt_serverside}
     }
     {$body}
 }";

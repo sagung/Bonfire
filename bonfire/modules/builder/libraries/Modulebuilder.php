@@ -343,6 +343,11 @@ class Modulebuilder
                 $data['action_label'] = $this->options['form_action_options'][$action_name];
                 $content['views'][$context_name]['js'] = $this->buildView($data);
 
+                // Build the js php view.
+                $data['action_name'] = 'js_php';
+                $data['action_label'] = $this->options['form_action_options'][$action_name];
+                $content['views'][$context_name]['js_php'] = $this->buildView($data);
+
                 // Build the sub_nav view.
                 $data['action_name'] = 'sub_nav';
                 $content['views'][$context_name]['_sub_nav'] = $this->buildView($data);
@@ -684,6 +689,7 @@ class Modulebuilder
             case 'index_front':
             case 'delete':
             case 'js':
+            case 'js_php':
             case 'sub_nav':
                 $view_name = $action_name;
                 break;

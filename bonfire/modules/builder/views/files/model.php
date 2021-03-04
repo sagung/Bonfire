@@ -119,6 +119,68 @@ if ( ! empty($rules)) {
 	';
 }
 
+$datatable_serverside = "
+	/*
+	* Datatable Serverside Function
+	*/
+	public function _get_datatables_query()
+    {
+		\$i = 0;   
+		\$value = \$this->input->post('search')['value'];  
+		
+		foreach (\$this->validation_rules as \$item) { 
+			if(\$value)  {
+				\$key = \$item['field'];
+				if(\$i==0) {        
+                    \$this->db->group_start(); 
+                    \$this->db->like(\$key, \$value);
+                }
+                else{                
+                    \$this->db->or_like(\$key, \$value);
+                }
+ 
+				if( count(\$this->validation_rules) - 1 == \$i)  {
+					\$this->db->group_end(); 
+				}                    
+            }
+            \$i++;
+		}
+         
+        if(null !== \$this->input->post('order')) {
+			\$ordering_field = \$this->validation_rules[\$this->input->post('order')['0']['column']]['field'];
+			\$this->order_by(\$ordering_field, \$this->input->post('order')['0']['dir']);
+		}
+		else{
+			\$this->order_by(\$this->created_field,'desc');
+		}
+		
+    }
+ 
+    function get_datatables()
+    {
+		\$this->_get_datatables_query();
+		
+		if(\$this->input->post('length') != -1){
+			\$this->limit(\$this->input->post('length'), \$this->input->post('start'));
+		}
+        	
+        return \$this->find_all();
+    }
+ 
+    function count_all_filtered()
+    {
+        \$query = \$this->db->get(\$this->table_name);
+        return (int) \$query->num_rows();
+    }
+ 
+    function count_filtered()
+    {
+        \$this->_get_datatables_query();
+        \$query = \$this->db->get(\$this->table_name);
+        return (int) \$query->num_rows();
+    }
+";
+
 //------------------------------------------------------------------------------
 // Output the model
 //------------------------------------------------------------------------------
@@ -166,5 +228,7 @@ class {$ucModuleName}_model extends BF_Model
     public function __construct()
     {
         parent::__construct();
-    }
+	}
+	
+	{$datatable_serverside}
 }";

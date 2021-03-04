@@ -118,6 +118,9 @@ class Settings extends Admin_Controller
         $this->form_validation->set_rules('password_show_labels', 'lang:bf_password_show_labels', 'trim|numeric');
         $this->form_validation->set_rules('languages[]', 'lang:bf_language', 'required|trim');
 
+        // Upload image/s if exists
+        $upload = $this->save_image();
+
         // Setup the validation rules for any extended settings
         $extended_data = array();
         foreach ($extended_settings as $field) {
@@ -206,6 +209,79 @@ class Settings extends Admin_Controller
         }
 
         return $result;
+    }
+
+    //--------------------------------------------------------------------
+    // !PRIVATE METHODS
+    //--------------------------------------------------------------------
+
+    /**
+     * Save the data.
+     *
+     * @return bool|int An int ID for successful inserts, true for successful
+     * updates, else false.
+     */
+    private function save_image()
+    {        
+        // considering that do_upload() accepts single files, we will have to do a small hack so that we can upload multiple files. For this we will have to keep the data of uploaded files in a variable, and redo the $_FILE.
+        $files = $_FILES['img'];
+        $keylist = array_keys($files['name']); 
+        // retrieve the number of images uploaded;
+        $number_of_files = sizeof($keylist);
+        
+        $return = false;
+        $this->load->library('upload');
+        for ($i = 0; $i < $number_of_files; $i++) {
+            $keyname = $keylist[$i];
+            
+            $_FILES['uploadedimage']['name'] = $files['name'][$keyname][0];
+            $_FILES['uploadedimage']['type'] = $files['type'][$keyname][0];
+            $_FILES['uploadedimage']['tmp_name'] = $files['tmp_name'][$keyname][0];
+            $_FILES['uploadedimage']['error'] = $files['error'][$keyname][0];
+            $_FILES['uploadedimage']['size'] = $files['size'][$keyname][0];
+            
+            $config = $this->init_upload($keyname);
+            //now we initialize the upload library
+            $this->upload->initialize($config);
+            // we retrieve the number of files that were uploaded
+            if ($this->upload->do_upload('uploadedimage')){
+                $data_upload['uploads'][$i] = $this->upload->data();
+                $_POST[$keyname] =  $data_upload['uploads'][$i]['file_name'];
+                echo $_POST[$keyname].'<hr>';
+                $return = true;
+            }
+            else{
+                $data_upload['upload_errors'][$i] = $this->upload->display_errors();
+            }
+        }
+        return $return;
+    }
+    
+    /**
+     * Upload file.
+     *
+     * @return bool|int An int ID for successful inserts, true for successful
+     * updates, else false.
+     */
+     
+    private function init_upload($keyname = ''){
+        $filename =  $keyname; 
+        $dir_upload = './'.$this->config->item('dir_upload').'/';
+        if (!is_dir($dir_upload)) {
+            mkdir($dir_upload, 0777, TRUE);
+        }
+
+        $config = array(
+            'upload_path' => $dir_upload,
+            'allowed_types' => "gif|jpg|png|jpeg",
+            'overwrite' => TRUE,
+            'max_size' => "2048", // Can be set to particular file size , here it is 2 MB(2048 Kb)
+            'max_height' => "1024",
+            'max_width' => "1024",
+            'file_name' => $filename
+        );
+        
+        return $config;
     }
 }
 /* end /bonfire/modules/settings/controllers/settings.php */

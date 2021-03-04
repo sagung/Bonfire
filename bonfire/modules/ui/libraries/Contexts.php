@@ -7,7 +7,7 @@
  *
  * @package   Bonfire
  * @author    Bonfire Dev Team
- * @copyright Copyright (c) 2011 - 2018, Bonfire Dev Team
+ * @copyright Copyright (c) 2011 - 2015, Bonfire Dev Team
  * @license   http://opensource.org/licenses/MIT The MIT License
  * @link      http://cibonfire.com
  * @since     Version 1.0
@@ -27,29 +27,30 @@ class Contexts
     /*
      * Templates and related strings for building the context menus
      */
-    protected static $templateContextNav  = "<ul class='{class}'{extra}>\n{menu}</ul>\n";
-    protected static $templateContextMenu = "<li class='{parent_class}'><a href='{url}' id='{id}' class='{current_class}' title='{title}'{extra}>{text}</a>{content}</li>\n";
-    protected static $templateMenu        = "<li><a {extra}href='{url}' title='{title}'>{display}</a>\n</li>\n";
-    protected static $templateSubMenu     = "<li class='{submenu_class}'><a href='{url}'>{display}</a><ul class='{child_class}'>{view}</ul></li>\n";
+    protected static $templateContextNav  = "<ul class='{class}'{extra}>\n{dashboard}{menu}</ul>\n";
+    protected static $templateContextMenu = "<li class='{parent_class}' {extra}><a href='{urlcontext}' class='{current_class}' title='{title}'><span class='menu-text'>{text}</span> {angle}</a>{content}</li>\n";
+    protected static $templateMenu        = "<li class='{submenu_class}' {extra}><a href='{url}' class='menu-link' title='{title}'><span class='menu-text'>{display}</span></a>\n</li>\n";
+    protected static $templateSubMenu     = "<li class='{submenu_class}' {extra}><a class='menu-link' href='{url}'><span class='menu-text'>{display}</span><i class='menu-arrow'></i></a><div class='menu-submenu menu-submenu-classic menu-submenu-right'><ul class='{child_class}'>{view}\n</ul>\n</div>\n</li>\n";
 
-    protected static $templateContextEnd             = "<span class='caret'></span>";
+    protected static $templateContextEnd             = "";//"<span class='caret'></span>";
     protected static $templateContextImage           = "<img src='{image}' alt='{title}' />";
     protected static $templateContextText            = "{title}";
-    protected static $templateContextMenuAnchorClass = 'dropdown-toggle';
-    protected static $templateContextMenuExtra       = " data-toggle='dropdown' data-id='{dataId}_menu'";
-    protected static $templateContextNavMobileClass  = 'mobile_nav';
+    protected static $templateContextMenuAnchorClass = 'menu-link menu-toggle';//'dropdown-toggle';
+    protected static $templateContextMenuExtra       = "data-menu-toggle='click' aria-haspopup='true' data-id='{dataId}_menu'";
+    protected static $templateContextNavMobileClass  = '';//'mobile_nav';
+    protected static $templateContextSubMenuExtra    = "data-menu-toggle='hover' aria-haspopup='true'";
 
     /** @var string The class name to attach to the outer ul tag. */
-    protected static $outer_class = 'nav';
+    protected static $outer_class = 'menu-nav';
 
     /** @var string The class to attach to li tags with children. */
-    protected static $parent_class = 'dropdown';
+    protected static $parent_class = 'menu-item menu-item-submenu menu-item-rel';
 
     /** @var string The class to apply to li tags within ul tags inside. */
-    protected static $submenu_class = 'dropdown-submenu';
+    protected static $submenu_class = 'menu-item  menu-item-submenu';//'treeview-menu';
 
     /** @var string The class to apply to ul tags within li tags. */
-    protected static $child_class = 'dropdown-menu';
+    protected static $child_class = 'menu-subnav';
 
     /** @var string The id to apply to the outer ul tag. */
     protected static $outer_id = null;
@@ -242,32 +243,46 @@ class Contexts
                     ),
                     $template
                 );
+                // echoPre($context);
+                $favicon = self::$ci->config->item('icon-context');
+                
+                $parent = false;
+                if(in_array($context,array("report"))){
+                    $parent = true;
+                }
 
                 // Build the menu for this context.
                 $menu .= str_replace(
-                    array('{parent_class}', '{url}', '{id}', '{current_class}', '{title}', '{extra}', '{text}', '{content}'),
+                    array('{parent_class}', '{url}', '{id}', '{current_class}', '{title}', '{extra}', '{text}', '{content}', '{favicon}', '{angle}', '{urlcontext}'),
                     array(
-                        self::$parent_class . ' ' . check_class($context, true),
+                        check_class($context, true). ' ' .self::$parent_class,
                         site_url(self::$site_area . "/{$context}"),
                         "tb_{$context}",
-                        $top_level_only ? '' : self::$templateContextMenuAnchorClass,
+                        $parent == false ? ($top_level_only ? '' : self::$templateContextMenuAnchorClass ) : '',
                         $title,
                         str_replace('{dataId}', $context, self::$templateContextMenuExtra),
                         $navTitle,
-                        $top_level_only ? '' : self::context_nav($context),
+                        $parent == false ? ($top_level_only ? '' : self::context_nav($context)) : '',
+                        isset($favicon[$context]) ? '': '',
+                        ( $parent == false) ? '' : '',
+                        '#',
                     ),
                     self::$templateContextMenu
                 );
             }
         }
-
+        
+        //site_url(self::$site_area . "/{$context}/{$module}")
+        $dashboard = "<li class='menu-item  menu-item-active' aria-haspopup='true'><a class='menu-link' href='".site_url(self::$site_area . "/home")."'  title='Dashboard'><span class='menu-text'>Dashboard</span> </a></li>\n";
+        
         // Put the generated menu into the context nav template.
         $nav = str_replace(
-            array('{class}', '{extra}', '{menu}'),
+            array('{class}', '{extra}', '{menu}', '{dashboard}'),
             array(
                 self::$outer_class,
                 trim(self::$outer_id) == '' ? '' : ' id="' . self::$outer_id . '"',
-                $menu,
+                $dashboard . $menu,
+                '', 
             ),
             self::$templateContextNav
         );
@@ -313,19 +328,20 @@ class Contexts
      *
      * @return string The HTML necessary to display the menu.
      */
-    public static function context_nav($context = null, $class = 'dropdown-menu', $ignore_ul = false)
+    public static function context_nav($context = null, $class = 'menu-subnav', $ignore_ul = false)
     {
         // Get a list of modules with a controller matching $context ('content',
         // 'settings', 'reports', or 'developer').
         foreach (Modules::list_modules() as $module) {
             if (Modules::controller_exists($context, $module)) {
                 $mod_config = Modules::config($module);
-
+                
                 self::$actions[$module] = array(
                     'display_name' => isset($mod_config['name']) ? $mod_config['name'] : $module,
                     'menus'        => isset($mod_config['menus']) ? $mod_config['menus'] : false,
                     'title'        => isset($mod_config['description']) ? $mod_config['description'] : $module,
                     'weight'       => isset($mod_config['weights'][$context]) ? $mod_config['weights'][$context] : 0,
+                    'favicon'       => isset($mod_config['favicon']) ? $mod_config['favicon'] : 'fa-folder',
                 );
 
                 // This is outside the array because the else portion uses the
@@ -362,18 +378,21 @@ class Contexts
                 self::$menu[$menu_topic][$module] = array(
                     'display_name' => $config['display_name'],
                     'title'        => $config['title'],
+                    'favicon'      => $config['favicon'],
                     'menu_topic'   => $menu_topic,
                     'menu_view'    => $config['menus'] && isset($config['menus'][$context]) ?
                         $config['menus'][$context] : '',
                 );
             }
         }
-
+        $wrapper = "<div class='menu-submenu menu-submenu-classic menu-submenu-left' data-hor-direction='menu-submenu-left'>";
+        $end_wrapper = "</div>";
         // Add any sub-menus and reset the $actions array for the next pass.
         $menu = self::build_sub_menu($context, $ignore_ul);
         self::$actions = array();
 
-        return $menu;
+        
+        return $wrapper.$menu.$end_wrapper;
     }
 
     //--------------------------------------------------------------------------
@@ -514,7 +533,7 @@ class Contexts
      */
     public static function build_sub_menu($context, $ignore_ul = false)
     {
-        $search = array('{submenu_class}', '{url}', '{display}', '{child_class}', '{view}');
+        $search = array('{submenu_class}', '{extra}', '{url}', '{display}', '{child_class}', '{view}');
         $list   = '';
         foreach (self::$menu as $topic_name => $topic) {
             if (count($topic) <= 1) {
@@ -524,8 +543,10 @@ class Contexts
                         $vals['title'],
                         $vals['display_name'],
                         $context,
-                        $vals['menu_view']
+                        $vals['menu_view'],
+                        $vals['favicon']
                     );
+                    //echoPre($list);
                 }
             } else {
                 // If there is more than one item in the topic, build out a menu
@@ -561,6 +582,7 @@ class Contexts
                     $search,
                     array(
                         self::$submenu_class,
+                        self::$templateContextSubMenuExtra,
                         '#',
                         ucwords($topic_name),
                         self::$child_class,
@@ -576,7 +598,7 @@ class Contexts
         if ($ignore_ul) {
             return $list;
         }
-
+        
         return str_replace(
             array('{class}', '{extra}', '{menu}'),
             array(self::$child_class, '', $list),
@@ -595,14 +617,14 @@ class Contexts
      *
      * @return string The HTML necessary for a single item and its sub-menus.
      */
-    private static function buildItem($module, $title, $display_name, $context, $menu_view = '')
+    private static function buildItem($module, $title, $display_name, $context, $menu_view = '', $favicon = 'fa-folder')
     {
         // Handle localization of the display name, if needed.
         if (strpos($display_name, 'lang:') === 0) {
             $display_name = lang(str_replace('lang:', '', $display_name));
         }
         $displayName = ucwords(str_replace('_', '', $display_name));
-
+        
         // Add lang for module description menu
         if (strpos($title, 'lang:') === 0) {
             $title = lang(str_replace('lang:', '', $title));
@@ -610,12 +632,14 @@ class Contexts
 
         if (empty($menu_view)) {
             return str_replace(
-                array('{extra}', '{url}', '{title}', '{display}'),
+                array('{submenu_class}','{extra}', '{url}', '{title}', '{display}', '{favicon}'),
                 array(
+                    self::$submenu_class,
                     $module == self::$ci->uri->segment(3) ? 'class="active" ' : '',
                     site_url(self::$site_area . "/{$context}/{$module}"),
                     $title,
                     $displayName,
+                    $favicon,
                 ),
                 self::$templateMenu
             );
@@ -623,9 +647,10 @@ class Contexts
 
         // Sub Menus?. Only works if it's a valid view…
         return str_replace(
-            array('{submenu_class}', '{url}', '{display}', '{child_class}', '{view}'),
+            array('{submenu_class}', '{extra}', '{url}', '{display}', '{child_class}', '{view}'),
             array(
                 self::$submenu_class,
+                self::$templateContextSubMenuExtra,
                 '#',
                 $displayName,
                 self::$child_class,

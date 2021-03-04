@@ -1,10 +1,10 @@
-	<div class="page-header">
-		<h1>Reset Your Password</h1>
-	</div>
+<div class="page-header">
+	<h1>Reset Your Password</h1>
+</div>
 
-	<div class="alert alert-info fade in">
-		<h4 class="alert-heading"><?php echo lang('us_reset_password_note'); ?></h4>
-	</div>
+<div class="alert alert-info fade in">
+	<h4 class="alert-heading"><?php echo lang('us_reset_password_note'); ?></h4>
+</div>
 
 
 <?php if (validation_errors()) : ?>
@@ -20,7 +20,7 @@
 
 	<input type="hidden" name="user_id" value="<?php echo $user->id ?>" />
 
-	<div class="control-group <?php echo iif( form_error('password') , 'error') ;?>">
+	<div class="control-group <?php echo iif( form_error('password') , 'danger') ;?>">
 		<label class="control-label" for="password"><?php echo lang('bf_password'); ?></label>
 		<div class="controls">
 			<input class="span6" type="password" name="password" id="password" value="" placeholder="Password...." />
@@ -28,7 +28,7 @@
 		</div>
 	</div>
 
-	<div class="control-group <?php echo iif( form_error('pass_confirm') , 'error') ;?>">
+	<div class="control-group <?php echo iif( form_error('pass_confirm') , 'danger') ;?>">
 		<label class="control-label" for="pass_confirm"><?php echo lang('bf_password_confirm'); ?></label>
 		<div class="controls">
 			<input class="span6" type="password" name="pass_confirm" id="pass_confirm" value="" placeholder="<?php echo lang('bf_password_confirm'); ?>" />

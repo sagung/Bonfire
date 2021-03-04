@@ -129,13 +129,13 @@ $config['template.use_mobile_themes'] = false;
 //------------------------------------------------------------------------------
 // This is the folder name that contains the default theme to use when
 // 'template.use_mobile_themes' is set to true.
-$config['template.default_theme']	= 'default/';
+$config['template.default_theme']	= 'homefront/';
 
 //------------------------------------------------------------------------------
 // ADMIN THEME
 //------------------------------------------------------------------------------
 // This is the folder name that contains the default admin theme to use
-$config['template.admin_theme'] = 'admin';
+$config['template.admin_theme'] = 'metro2';
 
 //------------------------------------------------------------------------------
 // Templates

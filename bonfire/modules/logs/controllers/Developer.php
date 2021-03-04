@@ -112,6 +112,17 @@ class Developer extends Admin_Controller
         $this->pager['total_rows']  = count($logs);
         $this->pager['uri_segment'] = $uriSegment;
 
+        $this->pager['full_tag_open'] = '<ul class="pagination pagination-sm no-margin pull-right">';
+        $this->pager['full_tag_close'] = '</ul>';
+         
+        $this->pager['first_link'] = 'First Page';
+        $this->pager['first_tag_open'] = '<li>';
+        $this->pager['first_tag_close'] = '</li>';
+         
+        $this->pager['last_link'] = 'Last Page';
+        $this->pager['last_tag_open'] = '<li>';
+        $this->pager['last_tag_close'] = '</li>';
+        
         $this->pagination->initialize($this->pager);
 
         Template::set('logs', array_slice($logs, $offset, $limit));

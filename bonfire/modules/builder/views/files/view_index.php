@@ -84,7 +84,7 @@ if ($db_required == 'new') {
 		$field_total++;
 	}
 }
-
+$field_total++;
 $permissionName = preg_replace("/[ -]/", "_", ucfirst($module_name)) . '.' . ucfirst($controller_name);
 
 //------------------------------------------------------------------------------
@@ -101,55 +101,50 @@ if (\$can_delete) {
     \$num_columns++;
 }
 ?>
-<div class='admin-box'>
-	<h3>
-		<?php echo lang('{$module_name_lower}_area_title'); ?>
-	</h3>
-	<?php echo form_open(\$this->uri->uri_string()); ?>
-		<table class='table table-striped'>
-			<thead>
-				<tr>
-					<?php if (\$can_delete && \$has_records) : ?>
-					<th class='column-check'><input class='check-all' type='checkbox' /></th>
-					<?php endif;?>
-					{$headers}
-				</tr>
-			</thead>
-			<?php if (\$has_records) : ?>
-			<tfoot>
-				<?php if (\$can_delete) : ?>
-				<tr>
-					<td colspan='<?php echo \$num_columns; ?>'>
-						<?php echo lang('bf_with_selected'); ?>
-						<input type='submit' name='delete' id='delete-me' class='btn btn-danger' value=\"<?php echo lang('bf_action_delete'); ?>\" onclick=\"return confirm('<?php e(js_escape(lang('{$module_name_lower}_delete_confirm'))); ?>')\" />
-					</td>
-				</tr>
-				<?php endif; ?>
-			</tfoot>
-			<?php endif; ?>
-			<tbody>
-				<?php
-				if (\$has_records) :
-					foreach (\$records as \$record) :
-				?>
-				<tr>
+<div class='card card-custom'>
+	<div class='card-body'>
+		
+		<?php echo form_open(\$this->uri->uri_string()); ?>
+		<table class='table table-bordered table-hover table-checkable' id='table' style='margin-top: 13px !important'>	
+				<thead>
+					<tr>
+						<?php if (\$can_delete && \$has_records) : ?>
+							<th class='column-check'>
+								<label class='checkbox checkbox-single'>
+									<input type='checkbox' value='checkbox' class='check-all group-checkable'/>
+									<span></span>
+								</label>
+							</th>
+						<?php endif;?>
+						{$headers}
+						<th>Action</th>
+					</tr>
+				</thead>
+				<?php if (\$has_records) : ?>
+				<tfoot> <tr> <th colspan='<?php echo \$num_columns; ?>' style='display: none'>-</th> </tr> </tfoot>			
+			
+				<tfoot>
 					<?php if (\$can_delete) : ?>
-					<td class='column-check'><input type='checkbox' name='checked[]' value='<?php echo \$record->{$primary_key_field}; ?>' /></td>
-					<?php endif;?>
-					{$table_records}
-				</tr>
-				<?php
-					endforeach;
-				else:
-				?>
-				<tr>
-					<td colspan='<?php echo \$num_columns; ?>'><?php echo lang('{$module_name_lower}_records_empty'); ?></td>
-				</tr>
+					<tr>
+						<td colspan='<?php echo \$num_columns; ?>'>
+							<?php echo lang('bf_with_selected'); ?>
+							<input type='submit' name='delete' id='delete-me' class='btn btn-danger' value=\"<?php echo lang('bf_action_delete'); ?>\" onclick=\"return confirm('<?php e(js_escape(lang('{$module_name_lower}_delete_confirm'))); ?>')\" />
+						</td>
+					</tr>
+					<?php endif; ?>
+				</tfoot>
 				<?php endif; ?>
-			</tbody>
-		</table>
-	<?php
-    echo form_close();
-    {$pager}
-    ?>
-</div>";
+
+				<tbody> </tbody>
+			</table>
+		<?php echo form_close(); ?>
+		<?php {$pager} ?>
+				
+    </div>
+</div>
+
+<?php
+	Assets::add_js(\$this->load->view('js_php',true,true), 'inline' );
+?>
+
+";

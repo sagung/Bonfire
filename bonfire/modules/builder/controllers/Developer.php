@@ -98,7 +98,7 @@ class Developer extends Admin_Controller
         Template::set('modules', $configs);
         Template::set('toolbar_title', lang('mb_toolbar_title_index'));
 
-        Template::render('two_left');
+        Template::render('');
     }
 
     //--------------------------------------------------------------------------
@@ -162,7 +162,7 @@ class Developer extends Admin_Controller
     public function create_module($fields = 0)
     {
         $this->auth->restrict('Bonfire.Modules.Add');
-
+        
         $hide_form = false;
         $this->field_total = $fields;
 
@@ -185,11 +185,11 @@ class Developer extends Admin_Controller
             // Read the fields from the db table and pass them back to the form
             $table_fields = $this->table_info($this->input->post('table_name'));
             $num_fields   = is_array($table_fields) ? count($table_fields) : 0;
-
+            
             // $num_fields includes the primary key, field_total doesn't
             $fieldTotal = $num_fields > 0 ? $num_fields - 1 : $this->field_total;
             $formError  = false;
-
+            
             // If the table wasn't found, log/set an error message
             if (! empty($_POST) && $num_fields == 0) {
                 $formError = true;
@@ -197,7 +197,7 @@ class Developer extends Admin_Controller
                 log_message('error', "ModuleBuilder: {$error_message}");
                 Template::set('error_message', $error_message);
             }
-
+            
             Template::set('existing_table_fields', $table_fields);
 
             // Display the modulebuilder_form

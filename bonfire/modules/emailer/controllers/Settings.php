@@ -62,7 +62,8 @@ class Settings extends Admin_Controller
             } elseif ($protocol == 'smtp') {
                 $this->form_validation->set_rules('smtp_host', 'lang:emailer_smtp_address', 'required|trim');
                 $this->form_validation->set_rules('smtp_user', 'lang:emailer_smtp_username', 'trim');
-                $this->form_validation->set_rules('smtp_pass', 'lang:emailer_smtp_password', 'trim|matches_pattern[[A-Za-z0-9!@#\%$^&+=]{2,20}]');
+                //$this->form_validation->set_rules('smtp_pass', 'lang:emailer_smtp_password', 'trim|matches_pattern[[A-Za-z0-9!@#\%$^&+=]{2,20}]');
+                $this->form_validation->set_rules('smtp_pass', 'lang:emailer_smtp_password', 'trim');
                 $this->form_validation->set_rules('smtp_port', 'lang:emailer_smtp_port', 'trim|numeric');
                 $this->form_validation->set_rules('smtp_timeout', 'lang:emailer_smtp_timeout', 'trim|numeric');
             }

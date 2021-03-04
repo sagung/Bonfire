@@ -1,36 +1,45 @@
-<div class="page-header">
-	<h1><?php echo lang('us_reset_password'); ?></h1>
-</div>
+<?php
+	$logo = $this->settings_lib->item('ext.logo');
+?>
 
-<?php if (validation_errors()) : ?>
-	<div class="alert alert-error fade in">
-		<?php echo validation_errors(); ?>
+<div class="login-signin">
+
+	<div class="mb-10">
+		<h3 class="font-weight-bold"><?php echo $page_title; ?> : <?php echo $this->settings_lib->item('site.title') ?></h3>
 	</div>
-<?php endif; ?>
 
-<div class="alert alert-info fade in">
-	<?php echo lang('us_reset_note'); ?>
-</div>
+	<?php echo Template::message(); ?>
 
-<div class="row-fluid">
-	<div class="span12">
-
-<?php echo form_open($this->uri->uri_string(), array('class' => "form-horizontal", 'autocomplete' => 'off')); ?>
-
-	<div class="control-group <?php echo iif( form_error('email') , 'error'); ?>">
-		<label class="control-label required" for="email"><?php echo lang('bf_email'); ?></label>
-		<div class="controls">
-			<input class="span6" type="text" name="email" id="email" value="<?php echo set_value('email') ?>" />
+	<?php if (validation_errors()) : ?>
+	<div class="row">
+		<div class="col-md-12">
+			<div class="alert alert-error alert-dismissible">
+			<button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+				<?php echo validation_errors(); ?>
+			</div>
 		</div>
 	</div>
+	<?php endif; ?>
 
-	<div class="control-group">
-		<div class="controls">
+	<div class="alert alert-info">
+		<?php echo lang('us_reset_note'); ?>
+	</div>
+	
+	<div class="login-box-body">
+
+    	<?php echo form_open($this->uri->uri_string(), array('autocomplete' => 'off')); ?>
+
+		<div class="form-group <?php echo form_error('email') ? ' has-error' : ''; ?>">
+			
+			<input class="form-control h-auto form-control-solid py-4 px-8" type="text" required="required" name="email" id="email" placeholder="<?php echo lang('bf_email'); ?>" value="" />
+
+		</div>
+
+		<div class="control-group">
 			<input class="btn btn-primary" type="submit" name="send" value="<?php e(lang('us_send_password')); ?>" />
 		</div>
-	</div>
-
-<?php echo form_close(); ?>
-
-	</div>
+		
+		<?php echo form_close(); ?>
+		<br/><?php echo anchor(LOGIN_URL, '<< Login'); ?>
+    </div>
 </div>

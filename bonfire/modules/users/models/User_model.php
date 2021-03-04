@@ -76,7 +76,7 @@ class User_model extends BF_Model
         [
             'field' => 'username',
             'label' => 'lang:bf_username',
-            'rules' => 'trim|max_length[30]',
+            'rules' => 'required|trim|max_length[30]',
         ],
         [
             'field' => 'email',
@@ -787,7 +787,7 @@ class User_model extends BF_Model
      *
      * @param number $user_id User's ID.
      *
-     * @return array A 'message' (string) and 'error' (bool, true if an error
+     * @return array A 'message' (string) and 'danger' (bool, true if an error
      * occurred sending the activation email).
      */
     public function set_activation($user_id)
@@ -884,7 +884,7 @@ class User_model extends BF_Model
             $error = true;
         }
 
-        return ['message' => $message, 'error' => $error];
+        return ['message' => $message, 'danger' => $error];
     }
 
     // -------------------------------------------------------------------------

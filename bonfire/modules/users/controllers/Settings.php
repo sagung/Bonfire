@@ -51,6 +51,7 @@ class Settings extends Admin_Controller
             Assets::add_module_js('users', 'password_strength.js');
             Assets::add_module_js('users', 'jquery.strength.js');
         }
+        Assets::add_module_js('users', 'datatable.js');
 
         Template::set_block('sub_nav', 'users/settings/_sub_nav');
     }
@@ -93,7 +94,7 @@ class Settings extends Admin_Controller
             $checked = $this->input->post('checked');
             if (empty($checked)) {
                 // No users checked.
-                Template::set_message(lang('us_empty_id'), 'error');
+                Template::set_message(lang('us_empty_id'), 'danger');
             } else {
                 foreach ($checked as $userId) {
                     $this->$action($userId);
@@ -149,8 +150,8 @@ class Settings extends Admin_Controller
         }
 
         // Fetch the users to display
-        $this->user_model->limit($this->limit, $offset)
-                         ->where($where)
+        //$this->user_model->limit($this->limit, $offset)
+        $this->user_model->where($where)
                          ->select(
                              array(
                                 'users.id',
@@ -172,15 +173,26 @@ class Settings extends Admin_Controller
         Template::set('index_url', $indexUrl);
 
         // Pagination
-        $this->load->library('pagination');
+        /*$this->load->library('pagination');
 
         $this->pager['base_url']    = "{$indexUrl}{$filter}/";
         $this->pager['per_page'] = $this->limit;
         $this->pager['total_rows']  = $this->user_model->where($where)->count_all();
         $this->pager['uri_segment'] = 6;
 
-        $this->pagination->initialize($this->pager);
+        $this->pager['full_tag_open'] = '<ul class="pagination pagination-sm no-margin pull-right">';
+        $this->pager['full_tag_close'] = '</ul>';
+         
+        $this->pager['first_link'] = 'First Page';
+        $this->pager['first_tag_open'] = '<li>';
+        $this->pager['first_tag_close'] = '</li>';
+         
+        $this->pager['last_link'] = 'Last Page';
+        $this->pager['last_tag_open'] = '<li>';
+        $this->pager['last_tag_close'] = '</li>';
 
+        $this->pagination->initialize($this->pager);
+        */
         Template::set('filter_type', $filterType);
         Template::set('toolbar_title', lang('us_user_management'));
 
@@ -260,7 +272,7 @@ class Settings extends Admin_Controller
         }
 
         if (empty($userId)) {
-            Template::set_message(lang('us_empty_id'), 'error');
+            Template::set_message(lang('us_empty_id'), 'danger');
 
             redirect(SITE_AREA . '/settings/users');
         }
@@ -295,7 +307,7 @@ class Settings extends Admin_Controller
         if (! isset($user)) {
             Template::set_message(
                 sprintf(lang('us_unauthorized'), $user->role_name),
-                'error'
+                'danger'
             );
 
             redirect(SITE_AREA . '/settings/users');
@@ -379,17 +391,17 @@ class Settings extends Admin_Controller
     {
         $user = $this->user_model->find($id);
         if (! isset($user)) {
-            Template::set_message(lang('us_invalid_user_id'), 'error');
+            Template::set_message(lang('us_invalid_user_id'), 'danger');
             redirect(SITE_AREA . '/settings/users');
         }
 
         if ($user->id == $this->auth->user_id()) {
-            Template::set_message(lang('us_self_delete'), 'error');
+            Template::set_message(lang('us_self_delete'), 'danger');
             redirect(SITE_AREA . '/settings/users');
         }
 
         if (! has_permission("Permissions.{$user->role_name}.Manage")) {
-            Template::set_message(sprintf(lang('us_unauthorized'), $user->role_name), 'error');
+            Template::set_message(sprintf(lang('us_unauthorized'), $user->role_name), 'danger');
             redirect(SITE_AREA . '/settings/users');
         }
 
@@ -403,7 +415,7 @@ class Settings extends Admin_Controller
             );
                 Template::set_message(lang('us_action_deleted'), 'success');
         } elseif (! empty($this->user_model->error)) {
-            Template::set_message(lang('us_action_not_deleted') . $this->user_model->error, 'error');
+            Template::set_message(lang('us_action_not_deleted') . $this->user_model->error, 'danger');
         }
     }
 
@@ -438,7 +450,7 @@ class Settings extends Admin_Controller
         if ($this->user_model->update($id, array('users.deleted' => 0))) {
             Template::set_message(lang('us_user_restored_success'), 'success');
         } elseif (! empty($this->user_model->error)) {
-            Template::set_message(lang('us_user_restored_error') . $this->user_model->error, 'error');
+            Template::set_message(lang('us_user_restored_error') . $this->user_model->error, 'danger');
         }
     }
 
@@ -588,7 +600,7 @@ class Settings extends Admin_Controller
     private function setUserStatus($userId = false, $status = 1, $suppressEmail = 0)
     {
         if ($userId === false || $userId == -1) {
-            Template::set_message(lang('us_err_no_id'), 'error');
+            Template::set_message(lang('us_err_no_id'), 'danger');
             return;
         }
 
@@ -607,7 +619,7 @@ class Settings extends Admin_Controller
 
         if (! $result) {
             if (! empty($this->user_model->error)) {
-                Template::set_message(lang('us_err_status_error') . $this->user_model->error, 'error');
+                Template::set_message(lang('us_err_status_error') . $this->user_model->error, 'danger');
             }
             return;
         }

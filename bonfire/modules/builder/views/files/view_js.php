@@ -48,10 +48,19 @@ for ($counter = 1; $field_total >= $counter; $counter++) {
             if ($db_field_type != null) {
                 if ($db_field_type == 'DATE') {
                     $view .= "
-                    $('#{$field_name}').datepicker({dateFormat: 'yy-mm-dd'});";
+                    $('#{$field_name}').datepicker({
+                        format: 'dd-mm-yyyy', 
+                        todayHighlight: true,
+                        orientation: 'bottom left',
+                        
+                    });";
+                    
+
                 } elseif ($db_field_type == 'DATETIME') {
     				$view .= "
-                    $('#{$field_name}').datetimepicker({dateFormat: 'yy-mm-dd', timeFormat: 'hh:mm:ss'});";
+                    $('#{$field_name}').datetimepicker({
+                        dateFormat: 'yy-mm-dd', timeFormat: 'hh:mm:ss'
+                    });";
                 }
             }
             break;

@@ -47,7 +47,7 @@ class Settings extends Admin_Controller
 
         Assets::add_module_css('roles', 'css/settings.css');
 
-        Assets::add_js('codeigniter-csrf.js');
+        Assets::add_js(base_url('assets/js/codeigniter-csrf.js'));
         Assets::add_module_js('roles', 'jquery.tablehover.pack.js');
         Assets::add_module_js('roles', 'js/settings.js');
 
